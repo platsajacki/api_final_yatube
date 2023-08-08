@@ -1,15 +1,11 @@
 from django.contrib import admin
 
-from .models import Post, Comment
+from .models import Post, Group, Comment
 
 
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'text',
-        'post',
-    )
+class PostInline(admin.StackedInline):
+    model = Post
+    extra = 0
 
 
 class CommentInline(admin.StackedInline):
@@ -17,11 +13,28 @@ class CommentInline(admin.StackedInline):
     extra = 0
 
 
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'text', 'post',
+    )
+
+
+@admin.register(Group)
+class Group(admin.ModelAdmin):
+    list_display = (
+        'id', 'title', 'slug', 'description',
+    )
+    inlines = (
+        PostInline,
+    )
+
+
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'author',
-        'text', 'pub_date'
+        'id', 'author', 'text',
+        'pub_date', 'group',
     )
     inlines = (
         CommentInline,
