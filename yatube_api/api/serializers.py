@@ -23,11 +23,11 @@ class PostSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
+        model = Post
         fields = (
             'id', 'author', 'text',
             'pub_date', 'image', 'group'
         )
-        model = Post
         read_only_fields = ('author',)
 
 
@@ -37,6 +37,6 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = '__all__'
         model = Comment
+        fields = '__all__'
         read_only_fields = ('author',)
