@@ -4,7 +4,7 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
-from posts.models import Comment, Post
+from posts.models import Post, Comment, Group, Follow
 
 
 class Base64ImageField(serializers.ImageField):
@@ -38,5 +38,31 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
-        read_only_fields = ('author',)
+        fields = (
+            'id', 'author', 'text',
+            'created', 'post'
+        )
+        read_only_fields = ('author', 'post',)
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = (
+            'id', 'title', 'slug', 'description'
+        )
+
+
+class FollowSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+    following = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+
+    class Meta:
+        model = Follow
+        fields = (
+            'user', 'following'
+        )

@@ -45,6 +45,7 @@ class Post(models.Model):
     )
 
     class Meta:
+        ordering = ('pub_date',)
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
@@ -65,5 +66,17 @@ class Comment(models.Model):
     )
 
     class Meta:
+        ordering = ('created',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    following = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='followings'
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
