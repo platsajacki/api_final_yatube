@@ -14,6 +14,7 @@
 Теперь вы можете обращаться к API по адресу: http://127.0.0.1:8000/
     ```bash
     git clone https://github.com/platsajacki/api_final_yatube.git
+    ```
 
 2. Перейдите в директорию проекта:
     ```bash
