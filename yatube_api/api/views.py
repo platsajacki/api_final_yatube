@@ -2,15 +2,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.filters import SearchFilter
-from rest_framework.permissions import (
-    IsAdminUser, IsAuthenticated, SAFE_METHODS
-)
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import IsAuthenticated
 
-from .pagination import PostPaginator
-from .serializers import (
-    PostSerializer, GroupSerializer, CommentSerializer, FollowSerializer
-)
-from posts.models import Post, Group, Follow, User
+from .serializers import (CommentSerializer, FollowSerializer, GroupSerializer,
+                          PostSerializer)
+from posts.models import Follow, Group, Post, User
 
 
 class UpdateDestroyMixin:
@@ -30,9 +27,15 @@ class UpdateDestroyMixin:
 
 
 class PostViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
-    queryset = Post.objects.select_related('author', 'group')
     serializer_class = PostSerializer
-    pagination_class = PostPaginator
+
+    def get_queryset(self):
+        if (
+            'limit' in self.request.query_params
+            and 'offset' in self.request.query_params
+        ):
+            self.pagination_class = LimitOffsetPagination
+        return Post.objects.select_related('author', 'group')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -42,7 +45,7 @@ class CommentViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_post(self):
-        return get_object_or_404(Post, id=self.kwargs['idFollow'])
+        return get_object_or_404(Post, id=self.kwargs['id'])
 
     def get_queryset(self):
         return self.get_post().comments
@@ -54,11 +57,7 @@ class CommentViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
 class GroupViewsSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-
-    def get_permissions(self):
-        if self.request.method not in SAFE_METHODS:
-            return (IsAdminUser(),)
-        return super().get_permissions()
+    http_method_names = ['get']
 
 
 class FollowViewSet(viewsets.ModelViewSet):
@@ -66,19 +65,20 @@ class FollowViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     http_method_names = ['get', 'post']
     filter_backends = (SearchFilter,)
-    search_fields = ('following',)
+    search_fields = ('following__username',)
 
     def get_queryset(self):
         return Follow.objects.filter(user=self.request.user)
 
-    def get_following(self):
-        return get_object_or_404(
-            User, username=self.request.data.get('following')
-        )
-
     def perform_create(self, serializer):
+        try:
+            following = User.objects.get(
+                username=self.request.data.get('following')
+            )
+        except Exception:
+            raise ValidationError('Такого пользователя не существует.')
         if (
-            (following := self.get_following()) == self.request.user
+            following == self.request.user
             or self.get_queryset().filter(following=following).exists()
         ):
             raise ValidationError('Неверный запрос на подписку.')
