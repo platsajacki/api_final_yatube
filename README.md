@@ -14,43 +14,35 @@
 Теперь вы можете обращаться к API по адресу: http://127.0.0.1:8000/
     ```bash
     git clone https://github.com/platsajacki/api_final_yatube.git
-    ```
 
 2. Перейдите в директорию проекта:
     ```bash
     cd api_final_yatube
-    ```
 
 3. Создайте виртуальное окружение:
     ```bash
     python -m venv venv
-    ```
 
 4. Активируйте виртуальное окружение:
     - для Windows:
     ```bash
     venv\Scripts\activate
-    ```
 
     - для macOS и Linux:
     ```bash
     source venv/bin/activate
-    ```
 
 5. Установите зависимости:
     ```bash
     pip install -r requirements.txt
-    ```
 
 6. Примените миграции базы данных:
     ```bash
     python manage.py migrate
-    ```
 
 7. Запустите сервер разработки:
     ```bash
     python manage.py runserver
-    ```
 
 8. Теперь вы можете обращаться к API по адресу: http://127.0.0.1:8000/
 
